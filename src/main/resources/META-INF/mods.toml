@@ -2,31 +2,31 @@ modLoader="javafml" #mandatory
 loaderVersion="[43,)" #mandatory This specifies Forge 43.x.x and above.
 license="MIT" # Replace this with your actual license.
 # A URL to refer people to when problems occur with this mod
-#issueTrackerURL="https://change.me.to.your.issue.tracker.example.invalid/" #optional
+#issueTrackerURL="https://example.com/issues" #optional
 
 [[mods]] #mandatory
-modId="bludphenomenon" # Replace this with your actual mod id.
+modId="bludmod" # Replace this with your actual mod id.
 version="1.0.0" # Replace this with your actual mod version.
 displayName="Blud Phenomenon" # Replace this with your actual mod name.
-#updateJSONURL="https://change.me.example.invalid/updates.json" #optional
-#displayURL="https://change.me.to.your.mods.homepage.example.invalid/" #optional
-#logoFile="examplemod.png" #optional
-#credits="" #optional
-authors="Your Name" # Replace this with your actual name.
+#updateJSONURL="https://example.com/updates.json" #optional
+#displayURL="https://example.com" #optional
+#logoFile="bludphenomenon.png" #optional
+#credits="Thanks to everyone who helped!" #optional
+authors="Bludos" # Replace this with your actual name.
 #displayTest="MATCH_VERSION" #optional
 
 description='''
-This mod contains high volume sounda and violence.
+uh idk its secret you will know everything soon.
 '''
 
-[[dependencies.bludphenomenon]] #optional
+[[dependencies.bludmod]] #optional
 modId="forge" #mandatory
 mandatory=true #mandatory
 versionRange="[43,)" #mandatory
 ordering="NONE"
 side="BOTH"
 
-[[dependencies.bludphenomenon]]
+[[dependencies.bludmod]]
 modId="minecraft"
 mandatory=true
 versionRange="[1.19.2]" # This specifies Minecraft 1.19.2.
