@@ -34,8 +34,7 @@ import org.slf4j.Logger;
 public class MainMod {
     public static final String MODID = "bludmod";
     private static final Logger LOGGER = LogUtils.getLogger();
-    private boolean hasPlayedSound = false; // To track if the sound has already been played
-    private long lastPlayedDay = -1; // To track the last in-game day the sound was played
+    private boolean hasPlayedSoundTonight = false; // Tracks if the sound has been played this night
 
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
@@ -75,7 +74,6 @@ public class MainMod {
         if (!event.player.level.isClientSide) {  // Ensure it runs only on the server side
             Player player = event.player;
             long time = player.level.getDayTime() % 24000;
-            long currentDay = player.level.getDayTime() / 24000;
 
             if (time >= 13000 && time <= 23000) { // Check if it is night time
                 boolean isNearBed = false;
@@ -88,16 +86,14 @@ public class MainMod {
                     }
                 }
 
-                if (isNearBed && !hasPlayedSound && lastPlayedDay != currentDay) {
+                if (isNearBed && !hasPlayedSoundTonight) {
                     player.level.playSound(null, player.getOnPos(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
-                    
-                    hasPlayedSound = true;
-                    lastPlayedDay = currentDay; // Record the day the sound was played
-                } else if (!isNearBed) {
-                    hasPlayedSound = false;  // Reset the flag when the player moves away from the bed
+
+                    hasPlayedSoundTonight = true; // Mark that the sound has been played this night
                 }
             } else {
-                hasPlayedSound = false;  // Reset the flag if it's not night time
+                // Reset the flag when day starts
+                hasPlayedSoundTonight = false;
             }
         }
     }
@@ -106,7 +102,7 @@ public class MainMod {
     public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
-            LOGGER.info("Bro is watching logoutput");
+            LOGGER.info("Yo Pigga");
             LOGGER.info("Bludos >> {}", Minecraft.getInstance().getUser().getName());
         }
     }
