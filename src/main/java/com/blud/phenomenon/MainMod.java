@@ -43,7 +43,7 @@ public class MainMod {
         modEventBus.addListener(this::commonSetup);
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
-        ModSounds.SOUND_EVENTS.register(modEventBus);  // Register the sound events
+        ModSounds.register(modEventBus);  // Register the sound events
 
         MinecraftForge.EVENT_BUS.register(this);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);
