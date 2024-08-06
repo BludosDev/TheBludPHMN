@@ -4,12 +4,12 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BedBlock;
@@ -37,6 +37,7 @@ public class MainMod {
     public static final String MODID = "bludmod";
     private static final Logger LOGGER = LogUtils.getLogger();
     private boolean hasPlayedSound = false; // To track if the sound has already been played
+    private long lastPlayedDay = -1; // To track the last in-game day the sound was played
 
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
@@ -76,6 +77,7 @@ public class MainMod {
         if (!event.player.level.isClientSide) {  // Ensure it runs only on the server side
             Player player = event.player;
             long time = player.level.getDayTime() % 24000;
+            long currentDay = player.level.getDayTime() / 24000;
 
             if (time >= 13000 && time <= 23000) { // Check if it is night time
                 boolean isNearBed = false;
@@ -88,10 +90,15 @@ public class MainMod {
                     }
                 }
 
-                if (isNearBed && !hasPlayedSound) {
+                if (isNearBed && !hasPlayedSound && lastPlayedDay != currentDay) {
                     player.level.playSound(null, player.getOnPos(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
-                    player.getInventory().add(new ItemStack(Items.DIAMOND));
+                    
+                    // Apply slowness and darkness effects for 24 seconds (480 ticks)
+                    player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 480, 4));
+                    player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 480, 1));
+
                     hasPlayedSound = true;
+                    lastPlayedDay = currentDay; // Record the day the sound was played
                 } else if (!isNearBed) {
                     hasPlayedSound = false;  // Reset the flag when the player moves away from the bed
                 }
