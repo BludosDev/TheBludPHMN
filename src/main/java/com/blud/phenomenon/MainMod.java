@@ -3,6 +3,7 @@ package com.blud.phenomenon;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -10,9 +11,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.block.BedBlock;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -31,6 +33,7 @@ import org.slf4j.Logger;
 public class MainMod {
     public static final String MODID = "bludmod";
     private static final Logger LOGGER = LogUtils.getLogger();
+    private boolean hasPlayedSound = false; // To track if the sound has already been played
 
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
@@ -66,9 +69,24 @@ public class MainMod {
     }
 
     @SubscribeEvent
-    public void onBlockRightClick(PlayerInteractEvent.RightClickBlock event) {
-        if (!event.getLevel().isClientSide) {  // Fixing the getWorld() method to getLevel()
-            event.getLevel().playSound(null, event.getPos(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
+    public void onPlayerTick(TickEvent.PlayerTickEvent event) {
+        if (!event.player.level().isClientSide) {  // Ensure it runs only on the server side
+            Player player = event.player;
+            long time = player.level().getDayTime() % 24000;
+
+            if (time >= 13000 && time <= 23000) { // Check if it is night time
+                boolean isNearBed = player.level().getEntitiesOfClass(Block.class, player.getBoundingBox().inflate(4), 
+                    block -> block instanceof BedBlock).size() > 0;
+
+                if (isNearBed && !hasPlayedSound) {
+                    player.level().playSound(null, player.blockPosition(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
+                    hasPlayedSound = true;
+                } else if (!isNearBed) {
+                    hasPlayedSound = false;  // Reset the flag when the player moves away from the bed
+                }
+            } else {
+                hasPlayedSound = false;  // Reset the flag if it's not night time
+            }
         }
     }
 
@@ -76,8 +94,8 @@ public class MainMod {
     public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
-            LOGGER.info("Yo Pigga");
-            LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
+            LOGGER.info("Mod is loaded But not 100%");
+            LOGGER.info("Bludos >> {}", Minecraft.getInstance().getUser().getName());
         }
     }
 }
