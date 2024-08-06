@@ -2,6 +2,7 @@ package com.blud.phenomenon;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -9,9 +10,9 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.block.BedBlock;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
@@ -28,8 +29,6 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.phys.AABB;
 
 @Mod(MainMod.MODID)
 public class MainMod {
@@ -78,8 +77,8 @@ public class MainMod {
 
             if (time >= 13000 && time <= 23000) { // Check if it is night time
                 boolean isNearBed = false;
-                BlockPos playerPos = player.blockPosition();
-                for (BlockPos pos : BlockPos.betweenClosed(playerPos.offset(-5, -5, -5), playerPos.offset(5, 5, 5))) {
+                BlockPos playerPos = player.getOnPos();
+                for (BlockPos pos : BlockPos.betweenClosed(new BlockPos(playerPos.getX() - 5, playerPos.getY() - 5, playerPos.getZ() - 5), new BlockPos(playerPos.getX() + 5, playerPos.getY() + 5, playerPos.getZ() + 5))) {
                     if (player.level.getBlockState(pos).getBlock() instanceof BedBlock) {
                         isNearBed = true;
                         break;
@@ -87,7 +86,7 @@ public class MainMod {
                 }
 
                 if (isNearBed && !hasPlayedSound) {
-                    player.level.playSound(null, player.blockPosition(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
+                    player.level.playSound(null, player.getOnPos(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
                     hasPlayedSound = true;
                 } else if (!isNearBed) {
                     hasPlayedSound = false;  // Reset the flag when the player moves away from the bed
