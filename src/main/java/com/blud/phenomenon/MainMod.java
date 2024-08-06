@@ -28,8 +28,7 @@ import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
 
 @Mod(MainMod.MODID)
-public class MainMod
-{
+public class MainMod {
     public static final String MODID = "bludmod";
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -39,18 +38,18 @@ public class MainMod
     public static final RegistryObject<Block> BLUD_BLOCK = BLOCKS.register("blud_block", () -> new Block(BlockBehaviour.Properties.of(Material.STONE)));
     public static final RegistryObject<Item> BLUD_BLOCK_ITEM = ITEMS.register("blud_block", () -> new BlockItem(BLUD_BLOCK.get(), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS)));
 
-    public MainMod()
-    {
+    public MainMod() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.addListener(this::commonSetup);
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
+        ModSounds.SOUND_EVENTS.register(modEventBus);  // Register the sound events
+
         MinecraftForge.EVENT_BUS.register(this);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 
-    private void commonSetup(final FMLCommonSetupEvent event)
-    {
+    private void commonSetup(final FMLCommonSetupEvent event) {
         LOGGER.info("Blud Phenomenon Started Iguess");
 
         if (Config.logDirtBlock)
@@ -62,24 +61,21 @@ public class MainMod
     }
 
     @SubscribeEvent
-    public void onServerStarting(ServerStartingEvent event)
-    {
+    public void onServerStarting(ServerStartingEvent event) {
         LOGGER.info("Yo bro is running my mod in server");
     }
 
     @SubscribeEvent
     public void onBlockRightClick(PlayerInteractEvent.RightClickBlock event) {
-        if (!event.getWorld().isClientSide) {
-            event.getWorld().playSound(null, event.getPos(), ModSounds.PHEN_228_SOUND, SoundSource.PLAYERS, 1.0F, 1.0F);
+        if (!event.getLevel().isClientSide) {  // Fixing the getWorld() method to getLevel()
+            event.getLevel().playSound(null, event.getPos(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
         }
     }
 
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    public static class ClientModEvents
-    {
+    public static class ClientModEvents {
         @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent event)
-        {
+        public static void onClientSetup(FMLClientSetupEvent event) {
             LOGGER.info("Yo Pigga");
             LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
         }
