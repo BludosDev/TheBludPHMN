@@ -4,8 +4,6 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -83,7 +81,7 @@ public class MainMod {
                 boolean isNearBed = false;
                 BlockPos playerPos = player.getOnPos();
 
-                for (BlockPos pos : BlockPos.betweenClosed(new BlockPos(playerPos.getX() - 5, playerPos.getY() - 5, playerPos.getZ() - 5), new BlockPos(playerPos.getX() + 5, playerPos.getY() + 5, playerPos.getZ() + 5))) {
+                for (BlockPos pos : BlockPos.betweenClosed(new BlockPos(playerPos.getX() - 3, playerPos.getY() - 3, playerPos.getZ() - 3), new BlockPos(playerPos.getX() + 3, playerPos.getY() + 3, playerPos.getZ() + 3))) {
                     if (player.level.getBlockState(pos).getBlock() instanceof BedBlock) {
                         isNearBed = true;
                         break;
@@ -93,10 +91,6 @@ public class MainMod {
                 if (isNearBed && !hasPlayedSound && lastPlayedDay != currentDay) {
                     player.level.playSound(null, player.getOnPos(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
                     
-                    // Apply slowness and blindness effects for 24 seconds (480 ticks)
-                    player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 480, 4));
-                    player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 480, 1));
-
                     hasPlayedSound = true;
                     lastPlayedDay = currentDay; // Record the day the sound was played
                 } else if (!isNearBed) {
@@ -112,7 +106,7 @@ public class MainMod {
     public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
-            LOGGER.info("Yo Pigga");
+            LOGGER.info("Bro is watching logoutput");
             LOGGER.info("Bludos >> {}", Minecraft.getInstance().getUser().getName());
         }
     }
