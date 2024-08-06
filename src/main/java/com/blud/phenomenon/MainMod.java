@@ -28,6 +28,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
 
 @Mod(MainMod.MODID)
@@ -76,7 +77,14 @@ public class MainMod {
             long time = player.level.getDayTime() % 24000;
 
             if (time >= 13000 && time <= 23000) { // Check if it is night time
-                boolean isNearBed = player.level.getEntitiesOfClass(BedBlock.class, new AABB(player.getBoundingBox().inflate(5))).size() > 0;
+                boolean isNearBed = false;
+                BlockPos playerPos = player.blockPosition();
+                for (BlockPos pos : BlockPos.betweenClosed(playerPos.offset(-5, -5, -5), playerPos.offset(5, 5, 5))) {
+                    if (player.level.getBlockState(pos).getBlock() instanceof BedBlock) {
+                        isNearBed = true;
+                        break;
+                    }
+                }
 
                 if (isNearBed && !hasPlayedSound) {
                     player.level.playSound(null, player.blockPosition(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
@@ -95,7 +103,7 @@ public class MainMod {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
             LOGGER.info("Yo Pigga");
-            LOGGER.info("Bludos >> {}", Minecraft.getInstance().getUser().getName());
+            LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
         }
     }
 }
