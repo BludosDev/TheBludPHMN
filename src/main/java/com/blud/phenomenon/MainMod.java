@@ -93,9 +93,9 @@ public class MainMod {
                 if (isNearBed && !hasPlayedSound && lastPlayedDay != currentDay) {
                     player.level.playSound(null, player.getOnPos(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
                     
-                    // Apply slowness and darkness effects for 24 seconds (480 ticks)
+                    // Apply slowness and blindness effects for 24 seconds (480 ticks)
                     player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 480, 4));
-                    player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 480, 1));
+                    player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 480, 1));
 
                     hasPlayedSound = true;
                     lastPlayedDay = currentDay; // Record the day the sound was played
