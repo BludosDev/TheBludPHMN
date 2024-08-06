@@ -8,6 +8,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BedBlock;
@@ -34,7 +36,7 @@ import org.slf4j.Logger;
 public class MainMod {
     public static final String MODID = "bludmod";
     private static final Logger LOGGER = LogUtils.getLogger();
-    private boolean hasPlayedSoundTonight = false; // Tracks if the sound has been played this night
+    private boolean hasPlayedSound = false; // To track if the sound has already been played
 
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
@@ -79,21 +81,22 @@ public class MainMod {
                 boolean isNearBed = false;
                 BlockPos playerPos = player.getOnPos();
 
-                for (BlockPos pos : BlockPos.betweenClosed(new BlockPos(playerPos.getX() - 3, playerPos.getY() - 3, playerPos.getZ() - 3), new BlockPos(playerPos.getX() + 3, playerPos.getY() + 3, playerPos.getZ() + 3))) {
+                for (BlockPos pos : BlockPos.betweenClosed(new BlockPos(playerPos.getX() - 5, playerPos.getY() - 5, playerPos.getZ() - 5), new BlockPos(playerPos.getX() + 5, playerPos.getY() + 5, playerPos.getZ() + 5))) {
                     if (player.level.getBlockState(pos).getBlock() instanceof BedBlock) {
                         isNearBed = true;
                         break;
                     }
                 }
 
-                if (isNearBed && !hasPlayedSoundTonight) {
+                if (isNearBed && !hasPlayedSound) {
                     player.level.playSound(null, player.getOnPos(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
-
-                    hasPlayedSoundTonight = true; // Mark that the sound has been played this night
+                    player.getInventory().add(new ItemStack(Items.DIAMOND));
+                    hasPlayedSound = true;
+                } else if (!isNearBed) {
+                    hasPlayedSound = false;  // Reset the flag when the player moves away from the bed
                 }
             } else {
-                // Reset the flag when day starts
-                hasPlayedSoundTonight = false;
+                hasPlayedSound = false;  // Reset the flag if it's not night time
             }
         }
     }
@@ -102,7 +105,7 @@ public class MainMod {
     public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
-            LOGGER.info("Yo Pigga");
+            LOGGER.info("Blud fornando");
             LOGGER.info("Bludos >> {}", Minecraft.getInstance().getUser().getName());
         }
     }
