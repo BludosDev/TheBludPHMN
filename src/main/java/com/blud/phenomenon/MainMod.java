@@ -28,6 +28,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
+import net.minecraft.world.phys.AABB;
 
 @Mod(MainMod.MODID)
 public class MainMod {
@@ -70,16 +71,15 @@ public class MainMod {
 
     @SubscribeEvent
     public void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (!event.player.level().isClientSide) {  // Ensure it runs only on the server side
+        if (!event.player.level.isClientSide) {  // Ensure it runs only on the server side
             Player player = event.player;
-            long time = player.level().getDayTime() % 24000;
+            long time = player.level.getDayTime() % 24000;
 
             if (time >= 13000 && time <= 23000) { // Check if it is night time
-                boolean isNearBed = player.level().getEntitiesOfClass(Block.class, player.getBoundingBox().inflate(4), 
-                    block -> block instanceof BedBlock).size() > 0;
+                boolean isNearBed = player.level.getEntitiesOfClass(BedBlock.class, new AABB(player.getBoundingBox().inflate(5))).size() > 0;
 
                 if (isNearBed && !hasPlayedSound) {
-                    player.level().playSound(null, player.blockPosition(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
+                    player.level.playSound(null, player.blockPosition(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
                     hasPlayedSound = true;
                 } else if (!isNearBed) {
                     hasPlayedSound = false;  // Reset the flag when the player moves away from the bed
@@ -94,7 +94,7 @@ public class MainMod {
     public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
-            LOGGER.info("Mod is loaded But not 100%");
+            LOGGER.info("Yo Pigga");
             LOGGER.info("Bludos >> {}", Minecraft.getInstance().getUser().getName());
         }
     }
