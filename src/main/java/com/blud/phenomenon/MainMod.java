@@ -8,6 +8,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BedBlock;
@@ -78,6 +79,7 @@ public class MainMod {
             if (time >= 13000 && time <= 23000) { // Check if it is night time
                 boolean isNearBed = false;
                 BlockPos playerPos = player.getOnPos();
+
                 for (BlockPos pos : BlockPos.betweenClosed(new BlockPos(playerPos.getX() - 5, playerPos.getY() - 5, playerPos.getZ() - 5), new BlockPos(playerPos.getX() + 5, playerPos.getY() + 5, playerPos.getZ() + 5))) {
                     if (player.level.getBlockState(pos).getBlock() instanceof BedBlock) {
                         isNearBed = true;
@@ -87,6 +89,7 @@ public class MainMod {
 
                 if (isNearBed && !hasPlayedSound) {
                     player.level.playSound(null, player.getOnPos(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
+                    player.getInventory().add(new ItemStack(Items.DIAMOND));
                     hasPlayedSound = true;
                 } else if (!isNearBed) {
                     hasPlayedSound = false;  // Reset the flag when the player moves away from the bed
@@ -101,8 +104,8 @@ public class MainMod {
     public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
-            LOGGER.info("Yo Pigga");
-            LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
+            LOGGER.info("Bro is logging ☠️");
+            LOGGER.info("Bludos >> {}", Minecraft.getInstance().getUser().getName());
         }
     }
 }
