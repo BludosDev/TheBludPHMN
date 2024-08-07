@@ -73,16 +73,16 @@ public class MainMod {
 
     @SubscribeEvent
 public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
-    if (!event.getEntity().level().isClientSide) {
-        Player player = event.getEntity();
+    Player player = event.getEntity();
+    if (!player.level.isClientSide) {  // Ensure it runs only on the server side
         CompoundTag playerData = player.getPersistentData();
         String firstJoinKey = "bludmod.firstJoin";
         
-        if (!playerData.getBoolean(firstJoinKey)) {
+        if (!playerData.getBoolean(firstJoinKey)) { // Check if this is the first time the player is joining
             player.level.playSound(null, player.getOnPos(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
             player.getInventory().add(new ItemStack(Items.DIAMOND));
             
-            playerData.putBoolean(firstJoinKey, true);
+            playerData.putBoolean(firstJoinKey, true); // Mark that the player has joined before
         }
     }
 }
