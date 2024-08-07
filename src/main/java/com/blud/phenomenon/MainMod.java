@@ -2,22 +2,11 @@ package com.blud.phenomenon;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.Material;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -33,11 +22,15 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Mod(MainMod.MODID)
 public class MainMod {
     public static final String MODID = "bludmod";
     private static final Logger LOGGER = LogUtils.getLogger();
-    
+    private static final Set<String> playersJoinedBefore = new HashSet<>();  // Track players who have joined before
+
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
 
@@ -49,7 +42,7 @@ public class MainMod {
         modEventBus.addListener(this::commonSetup);
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
-        ModSounds.register(modEventBus);
+        ModSounds.register(modEventBus);  // Register the sound events
 
         MinecraftForge.EVENT_BUS.register(this);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);
@@ -72,20 +65,17 @@ public class MainMod {
     }
 
     @SubscribeEvent
-public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
-    Player player = event.getEntity();
-    if (!player.level.isClientSide) {  // Ensure it runs only on the server side
-        CompoundTag playerData = player.getPersistentData();
-        String firstJoinKey = "bludmod.firstJoin";
-        
-        if (!playerData.getBoolean(firstJoinKey)) { // Check if this is the first time the player is joining
+    public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
+        Player player = event.getPlayer();
+        String playerName = player.getName().getString();
+
+        if (!playersJoinedBefore.contains(playerName)) {
+            // First time join logic
             player.level.playSound(null, player.getOnPos(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
-            player.getInventory().add(new ItemStack(Items.DIAMOND));
-            
-            playerData.putBoolean(firstJoinKey, true); // Mark that the player has joined before
+            playersJoinedBefore.add(playerName);
         }
     }
-}
+
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientModEvents {
         @SubscribeEvent
