@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 
 import java.util.HashSet;
 import java.util.Set;
+import net.minecraft.client.Minecraft;  // Ensure this import is present
 
 @Mod(MainMod.MODID)
 public class MainMod {
