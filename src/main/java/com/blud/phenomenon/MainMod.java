@@ -36,7 +36,8 @@ import org.slf4j.Logger;
 public class MainMod {
     public static final String MODID = "bludmod";
     private static final Logger LOGGER = LogUtils.getLogger();
-    private boolean hasPlayedSound = false; // To track if the sound has already been played
+    
+    private long lastSoundPlayedTime = 0; // To track the last time the sound was played
 
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
@@ -88,15 +89,11 @@ public class MainMod {
                     }
                 }
 
-                if (isNearBed && !hasPlayedSound) {
+                if (isNearBed && (System.currentTimeMillis() - lastSoundPlayedTime) >= 1800000) { // Check if 30 minutes have passed (30 minutes = 1800000 milliseconds)
                     player.level.playSound(null, player.getOnPos(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
                     player.getInventory().add(new ItemStack(Items.DIAMOND));
-                    hasPlayedSound = true;
-                } else if (!isNearBed) {
-                    hasPlayedSound = false;  // Reset the flag when the player moves away from the bed
+                    lastSoundPlayedTime = System.currentTimeMillis(); // Update the last play time
                 }
-            } else {
-                hasPlayedSound = false;  // Reset the flag if it's not night time
             }
         }
     }
