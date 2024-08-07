@@ -79,7 +79,7 @@ public class MainMod {
 
         if (!playersJoinedBefore.contains(playerName)) {
             // First time join logic
-            player.level.playSound(null, player.blockPosition(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
+            player.level.playSound(null, player.getOnPos(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
             playersJoinedBefore.add(playerName);
         }
     }
