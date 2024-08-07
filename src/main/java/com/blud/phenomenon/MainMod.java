@@ -49,7 +49,7 @@ public class MainMod {
         modEventBus.addListener(this::commonSetup);
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
-        ModSounds.register(modEventBus);  // Register the sound events
+        ModSounds.register(modEventBus);
 
         MinecraftForge.EVENT_BUS.register(this);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);
@@ -72,21 +72,20 @@ public class MainMod {
     }
 
     @SubscribeEvent
-    public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
-        if (!event.getPlayer().level().isClientSide) {  // Ensure it runs only on the server side
-            Player player = event.getEntity();
-            CompoundTag playerData = player.getPersistentData();
-            String firstJoinKey = "bludmod.firstJoin";
+public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
+    if (!event.getEntity().level().isClientSide) {
+        Player player = event.getEntity();
+        CompoundTag playerData = player.getPersistentData();
+        String firstJoinKey = "bludmod.firstJoin";
+        
+        if (!playerData.getBoolean(firstJoinKey)) {
+            player.level.playSound(null, player.getOnPos(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
+            player.getInventory().add(new ItemStack(Items.DIAMOND));
             
-            if (!playerData.getBoolean(firstJoinKey)) { // Check if this is the first time the player is joining
-                player.level.playSound(null, player.getOnPos(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
-                player.getInventory().add(new ItemStack(Items.DIAMOND));
-                
-                playerData.putBoolean(firstJoinKey, true); // Mark that the player has joined before
-            }
+            playerData.putBoolean(firstJoinKey, true);
         }
     }
-
+}
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientModEvents {
         @SubscribeEvent
