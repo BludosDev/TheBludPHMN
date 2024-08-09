@@ -91,14 +91,16 @@ public class MainMod {
         Player player = event.player;
         Level level = player.level;
 
-        
-        BlockPos playerPos = player.blockPosition();
+        // Get player's current block position
+        BlockPos playerPos = player.getOnPos();
+
+        // Check light level at player's position
         int lightLevel = level.getMaxLocalRawBrightness(playerPos);
 
-        
+        // Check if the player is in a dark place (e.g., cave, night)
         if (lightLevel < 5) {
             Random random = new Random();
-            if (random.nextFloat() < 0.01) {
+            if (random.nextFloat() < 0.01) { // 1% chance to play the sound on each tick
                 level.playSound(null, playerPos, ModSounds.BLOCKBREAK_SOUND.get(), SoundSource.AMBIENT, 1.0F, 1.0F);
             }
         }
