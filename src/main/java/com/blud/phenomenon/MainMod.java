@@ -85,11 +85,12 @@ public void onServerStarting(ServerStartingEvent event) {
     scheduler.schedule(() -> {
         MinecraftServer server = event.getServer();
         if (!hasSentMessage) {
-            server.getPlayerList().broadcastMessage(Component.literal("§eDhandu joined the game"), false);
+            server.getPlayerList().broadcastMessage(Component.text("§eDhandu joined the game"), false);
             hasSentMessage = true;
         }
     }, 60, TimeUnit.SECONDS);
 }
+
 
 
     @SubscribeEvent
