@@ -35,13 +35,8 @@ import org.slf4j.Logger;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.event.server.ServerTickEvent;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 @Mod(MainMod.MODID)
 public class MainMod {
@@ -93,27 +88,10 @@ public class MainMod {
 
             // Schedule the fake message to appear after a random delay between 20-50 seconds
             int delay = 20 * (20 + new Random().nextInt(31)); // Delay in ticks (20 ticks = 1 second)
-            scheduleFakeJoinMessage(player, delay);
+            player.getLevel().getServer().getTickEventQueue().schedule(() -> {
+                player.sendSystemMessage(Component.literal("Dhandu joined the game").withStyle(ChatFormatting.YELLOW));
+            }, delay);
         }
-    }
-
-    private void scheduleFakeJoinMessage(Player player, int delay) {
-        MinecraftForge.EVENT_BUS.register(new Object() {
-            private int ticksPassed = 0;
-
-            @SubscribeEvent
-            public void onServerTick(ServerTickEvent event) {
-                if (event.side == LogicalSide.SERVER) {
-                    ticksPassed++;
-                    if (ticksPassed >= delay) {
-                        // Send the fake message
-                        player.sendSystemMessage(Component.literal("Dhandu joined the game").withStyle(ChatFormatting.YELLOW));
-                        // Unregister this event after execution
-                        MinecraftForge.EVENT_BUS.unregister(this);
-                    }
-                }
-            }
-        });
     }
 
     @SubscribeEvent
