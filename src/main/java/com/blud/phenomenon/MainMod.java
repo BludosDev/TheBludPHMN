@@ -35,19 +35,15 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
 
-import java.util.HashSet;
 import java.util.Random;
-import java.util.Set;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.players.PlayerList;
 
 @Mod(MainMod.MODID)
 public class MainMod {
     public static final String MODID = "bludmod";
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final Set<String> playersJoinedBefore = new HashSet<>();
 
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
@@ -75,44 +71,29 @@ public class MainMod {
         LOGGER.info(Config.magicNumberIntroduction + Config.magicNumber);
 
         Config.items.forEach((item) -> LOGGER.info("ITEM >> {}", item.toString()));
+
+        // Schedule the fake player join message
+        scheduleFakeJoinMessage();
     }
 
-    @SubscribeEvent
-    public void onServerStarting(ServerStartingEvent event) {
-        LOGGER.info("Yo bro is running my mod in server");
-    }
+    private void scheduleFakeJoinMessage() {
+        Random random = new Random();
+        int delay = 30 + random.nextInt(11); // 30-40 seconds delay
 
-    @SubscribeEvent
-    public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
-        Player player = event.getEntity();
-        String playerName = player.getName().getString();
+        new Thread(() -> {
+            try {
+                Thread.sleep(delay * 1000L); // Convert delay to milliseconds and sleep
 
-        if (!playersJoinedBefore.contains(playerName)) {
-            player.level.playSound(null, player.getOnPos(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
-            playersJoinedBefore.add(playerName);
-        }
-
-        // Schedule the fake player join event
-        if (player.level instanceof ServerLevel) {
-            ServerLevel serverLevel = (ServerLevel) player.level;
-            MinecraftServer server = serverLevel.getServer();
-
-            server.execute(() -> {
-                Random random = new Random();
-                int delay = 30 + random.nextInt(11); // 30-40 seconds delay
-
-                try {
-                    Thread.sleep(delay * 1000L); // Convert delay to milliseconds and sleep
-
-                    // Send the fake join message
+                // Send the fake join message
+                MinecraftServer server = Minecraft.getInstance().getSingleplayerServer();
+                if (server != null) {
                     MutableComponent joinMessage = Component.literal("Dhandu joined the game").withStyle(style -> style.withColor(0xFFFF55)); // Yellow color
                     server.getPlayerList().broadcastMessage(joinMessage, false);
-
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
-            });
-        }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     @SubscribeEvent
