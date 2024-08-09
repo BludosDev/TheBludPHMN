@@ -1,9 +1,7 @@
 package com.blud.phenomenon;
 
 import com.mojang.logging.LogUtils;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -18,7 +16,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -26,6 +23,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -35,9 +33,6 @@ import org.slf4j.Logger;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import net.minecraft.client.Minecraft;
 
@@ -46,7 +41,6 @@ public class MainMod {
     public static final String MODID = "bludmod";
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Set<String> playersJoinedBefore = new HashSet<>();
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
@@ -89,13 +83,6 @@ public class MainMod {
         if (!playersJoinedBefore.contains(playerName)) {
             player.level.playSound(null, player.getOnPos(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
             playersJoinedBefore.add(playerName);
-
-            // Schedule the fake message to appear after a random delay between 20-50 seconds
-            int delay = 20 + new Random().nextInt(31); // Delay in seconds
-            scheduler.schedule(() -> {
-                Component message = Component.literal("Dhandu joined the game").withStyle(ChatFormatting.YELLOW);
-                player.sendMessage(message, player.getUUID());
-            }, delay, TimeUnit.SECONDS);
         }
     }
 
