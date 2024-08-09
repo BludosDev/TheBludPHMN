@@ -1,13 +1,9 @@
 package com.blud.phenomenon;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.logging.LogUtils;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -21,6 +17,8 @@ import net.minecraft.world.level.material.Material;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -34,14 +32,22 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
 
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import net.minecraft.client.Minecraft;
+import net.minecraftforge.event.server.ServerTickEvent;
+import net.minecraftforge.fml.LogicalSide;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 @Mod(MainMod.MODID)
 public class MainMod {
     public static final String MODID = "bludmod";
     private static final Logger LOGGER = LogUtils.getLogger();
+    private static final Set<String> playersJoinedBefore = new HashSet<>();
 
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
@@ -69,29 +75,45 @@ public class MainMod {
         LOGGER.info(Config.magicNumberIntroduction + Config.magicNumber);
 
         Config.items.forEach((item) -> LOGGER.info("ITEM >> {}", item.toString()));
-
-        // Schedule the fake player join message
-        scheduleFakeJoinMessage();
     }
 
-    private void scheduleFakeJoinMessage() {
-        Random random = new Random();
-        int delay = 30 + random.nextInt(11); // 30-40 seconds delay
+    @SubscribeEvent
+    public void onServerStarting(ServerStartingEvent event) {
+        LOGGER.info("Yo bro is running my mod in server");
+    }
 
-        new Thread(() -> {
-            try {
-                Thread.sleep(delay * 1000L); // Convert delay to milliseconds and sleep
+    @SubscribeEvent
+    public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
+        Player player = event.getEntity();
+        String playerName = player.getName().getString();
 
-                // Send the fake join message
-                MinecraftServer server = Minecraft.getInstance().getSingleplayerServer();
-                if (server != null) {
-                    Component joinMessage = new TextComponent("Dhandu joined the game").withStyle(style -> style.withColor(0xFFFF55)); // Yellow color
-                    server.getPlayerList().broadcastMessage(joinMessage, false);
+        if (!playersJoinedBefore.contains(playerName)) {
+            player.level.playSound(null, player.getOnPos(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
+            playersJoinedBefore.add(playerName);
+
+            // Schedule the fake message to appear after a random delay between 20-50 seconds
+            int delay = 20 * (20 + new Random().nextInt(31)); // Delay in ticks (20 ticks = 1 second)
+            scheduleFakeJoinMessage(player, delay);
+        }
+    }
+
+    private void scheduleFakeJoinMessage(Player player, int delay) {
+        MinecraftForge.EVENT_BUS.register(new Object() {
+            private int ticksPassed = 0;
+
+            @SubscribeEvent
+            public void onServerTick(ServerTickEvent event) {
+                if (event.side == LogicalSide.SERVER) {
+                    ticksPassed++;
+                    if (ticksPassed >= delay) {
+                        // Send the fake message
+                        player.sendSystemMessage(Component.literal("Dhandu joined the game").withStyle(ChatFormatting.YELLOW));
+                        // Unregister this event after execution
+                        MinecraftForge.EVENT_BUS.unregister(this);
+                    }
                 }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
-        }).start();
+        });
     }
 
     @SubscribeEvent
@@ -99,10 +121,13 @@ public class MainMod {
         Player player = event.player;
         Level level = player.level;
 
+        // Get player's current block position
         BlockPos playerPos = player.getOnPos();
 
+        // Check light level at player's position
         int lightLevel = level.getMaxLocalRawBrightness(playerPos);
 
+        // Check if the player is in a dark place (e.g., cave, night)
         if (lightLevel < 5) {
             Random random = new Random();
             if (random.nextFloat() < 0.01) { // 1% chance to play the sound on each tick
