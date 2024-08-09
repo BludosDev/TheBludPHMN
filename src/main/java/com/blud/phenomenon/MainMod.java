@@ -36,6 +36,7 @@ import java.util.Set;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 
 @Mod(MainMod.MODID)
 public class MainMod {
@@ -87,7 +88,8 @@ public class MainMod {
 
             // Send the message to all players in the server
             String joinMessage = "§e" + playerName + " joined the game";
-            player.level.players().forEach(p -> p.sendSystemMessage(Component.literal(joinMessage)));
+            Component messageComponent = new TextComponent(joinMessage);
+            player.level.players().forEach(p -> p.sendSystemMessage(messageComponent));
 
             // Add the player to the set to avoid sending the message again
             playersJoinedBefore.add(playerName);
