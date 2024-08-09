@@ -2,8 +2,9 @@ package com.blud.phenomenon;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.ChatFormatting;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
@@ -40,6 +41,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
 import net.minecraft.client.Minecraft;
 
 @Mod(MainMod.MODID)
@@ -84,7 +87,7 @@ public class MainMod {
 
     @SubscribeEvent
     public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
-        Player player = event.getEntity();
+        ServerPlayer player = (ServerPlayer) event.getEntity();
         String playerName = player.getName().getString();
 
         if (!playersJoinedBefore.contains(playerName)) {
@@ -95,8 +98,9 @@ public class MainMod {
         if (!messageSent) {
             ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
             scheduler.schedule(() -> {
-                Component message = new TextComponent("Dhandu joined the game").withStyle(ChatFormatting.YELLOW);
-                player.getServer().getPlayerList().broadcastSystemMessage(message, false);
+                MutableComponent message = new TextComponent("Dhandu joined the game").withStyle(ChatFormatting.YELLOW);
+                PlayerList playerList = player.getServer().getPlayerList();
+                playerList.broadcastMessage(message, false);
                 messageSent = true;
             }, 40, TimeUnit.SECONDS);
         }
