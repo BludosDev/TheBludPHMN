@@ -4,7 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -38,15 +38,10 @@ import org.slf4j.Logger;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
-import java.util.UUID;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.players.PlayerList;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket.Action;
-import net.minecraft.world.level.GameType;
 
 @Mod(MainMod.MODID)
 public class MainMod {
@@ -110,17 +105,9 @@ public class MainMod {
                     Thread.sleep(delay * 1000L); // Convert delay to milliseconds and sleep
 
                     // Send the fake join message
-                    Component joinMessage = new TextComponent("Dhandu joined the game").withStyle(style -> style.withColor(0xFFFF55)); // Yellow color
+                    MutableComponent joinMessage = Component.literal("Dhandu joined the game").withStyle(style -> style.withColor(0xFFFF55)); // Yellow color
                     server.getPlayerList().broadcastMessage(joinMessage, false);
 
-                    // Add the fake player to the tab list
-                    UUID dhanduUUID = UUID.randomUUID();
-                    GameProfile dhanduProfile = new GameProfile(dhanduUUID, "Dhandu");
-                    ServerPlayer fakePlayer = new ServerPlayer(server, serverLevel, dhanduProfile, null);
-                    fakePlayer.setGameMode(GameType.SURVIVAL);
-
-                    PlayerList playerList = server.getPlayerList();
-                    playerList.broadcastAll(new ClientboundPlayerInfoPacket(Action.ADD_PLAYER, fakePlayer));
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
