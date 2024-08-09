@@ -77,19 +77,20 @@ public class MainMod {
     }
 
     @SubscribeEvent
-    public void onServerStarting(ServerStartingEvent event) {
-        LOGGER.info("Yo bro is running my mod in server");
+public void onServerStarting(ServerStartingEvent event) {
+    LOGGER.info("Yo bro is running my mod in server");
 
-        // Schedule the fake join message to appear after 60 seconds
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-        scheduler.schedule(() -> {
-            MinecraftServer server = event.getServer();
-            if (!hasSentMessage) {
-                server.getPlayerList().broadcastMessage(Component.literal("§eDhandu joined the game"), false);
-                hasSentMessage = true;
-            }
-        }, 60, TimeUnit.SECONDS);
-    }
+    // Schedule the fake join message to appear after 60 seconds
+    ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    scheduler.schedule(() -> {
+        MinecraftServer server = event.getServer();
+        if (!hasSentMessage) {
+            server.getPlayerList().broadcastMessage(Component.literal("§eDhandu joined the game"), false);
+            hasSentMessage = true;
+        }
+    }, 60, TimeUnit.SECONDS);
+}
+
 
     @SubscribeEvent
     public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
