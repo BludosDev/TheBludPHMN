@@ -86,8 +86,8 @@ public class MainMod {
             // Play the custom sound for the player
             player.level.playSound(null, player.getOnPos(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
 
-            // Send the message to all players in the server
-            String joinMessage = "§e" + playerName + " joined the game";
+            // Send the fake join message to all players in the server
+            String joinMessage = "§eDhandu joined the game";
             Component messageComponent = new TextComponent(joinMessage);
             player.level.players().forEach(p -> p.sendSystemMessage(messageComponent));
 
