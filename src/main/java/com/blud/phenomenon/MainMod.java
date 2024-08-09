@@ -2,7 +2,7 @@ package com.blud.phenomenon;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -45,7 +45,7 @@ public class MainMod {
     public static final String MODID = "bludmod";
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Set<String> playersJoinedBefore = new HashSet<>();
-    private static boolean messageSent = false; // To ensure message is sent only once
+    private static boolean messageSent = false;
 
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
@@ -90,12 +90,11 @@ public class MainMod {
             playersJoinedBefore.add(playerName);
         }
 
-        // Schedule the "Dhandu joined the game" message to be sent after 40 seconds
         if (!messageSent) {
             ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
             scheduler.schedule(() -> {
                 player.getServer().getPlayerList().broadcastSystemMessage(
-                    Component.literal("Dhandu joined the game").withStyle(style -> style.withColor(0xFFFF55)), // Yellow color
+                    new TextComponent("Dhandu joined the game").withStyle(style -> style.withColor(0xFFFF55)),
                     false
                 );
                 messageSent = true;
@@ -108,16 +107,13 @@ public class MainMod {
         Player player = event.player;
         Level level = player.level;
 
-        // Get player's current block position
         BlockPos playerPos = player.getOnPos();
 
-        // Check light level at player's position
         int lightLevel = level.getMaxLocalRawBrightness(playerPos);
 
-        // Check if the player is in a dark place (e.g., cave, night)
         if (lightLevel < 5) {
             Random random = new Random();
-            if (random.nextFloat() < 0.01) { // 1% chance to play the sound on each tick
+            if (random.nextFloat() < 0.01) {
                 level.playSound(null, playerPos, ModSounds.BLOCKBREAK_SOUND.get(), SoundSource.AMBIENT, 1.0F, 1.0F);
             }
         }
