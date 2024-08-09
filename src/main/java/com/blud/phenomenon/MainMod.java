@@ -3,7 +3,7 @@ package com.blud.phenomenon;
 import com.mojang.logging.LogUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -93,7 +93,7 @@ public class MainMod {
             // Schedule the fake message to appear after a random delay between 20-50 seconds
             int delay = 20 + new Random().nextInt(31); // Delay in seconds
             scheduler.schedule(() -> {
-                player.sendSystemMessage(new TextComponent("Dhandu joined the game").withStyle(ChatFormatting.YELLOW));
+                player.sendSystemMessage(Component.literal("Dhandu joined the game").withStyle(ChatFormatting.YELLOW));
             }, delay, TimeUnit.SECONDS);
         }
     }
