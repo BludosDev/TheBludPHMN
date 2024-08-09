@@ -94,7 +94,7 @@ public class MainMod {
             ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
             scheduler.schedule(() -> {
                 player.getServer().getPlayerList().broadcastSystemMessage(
-                    Component.literal("Dhandu joined the game").withStyle(style -> style.withColor(0xFFFF55)),
+                    Component.translatable("Dhandu joined the game").withStyle(style -> style.withColor(0xFFFF55)),
                     false
                 );
                 messageSent = true;
