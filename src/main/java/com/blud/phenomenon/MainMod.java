@@ -3,7 +3,6 @@ package com.blud.phenomenon;
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
@@ -86,7 +85,7 @@ public class MainMod {
         scheduler.schedule(() -> {
             MinecraftServer server = event.getServer();
             if (!hasSentMessage) {
-                server.getPlayerList().broadcastMessage(new TextComponent("§eDhandu joined the game"), false);
+                server.getPlayerList().broadcastMessage(Component.literal("§eDhandu joined the game"), false);
                 hasSentMessage = true;
             }
         }, 60, TimeUnit.SECONDS);
