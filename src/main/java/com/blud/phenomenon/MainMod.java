@@ -2,6 +2,9 @@ package com.blud.phenomenon;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -16,6 +19,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -23,7 +27,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -33,6 +36,9 @@ import org.slf4j.Logger;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import net.minecraft.client.Minecraft;
 
@@ -41,6 +47,7 @@ public class MainMod {
     public static final String MODID = "bludmod";
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Set<String> playersJoinedBefore = new HashSet<>();
+    private static boolean hasSentMessage = false;
 
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
@@ -73,6 +80,16 @@ public class MainMod {
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         LOGGER.info("Yo bro is running my mod in server");
+
+        // Schedule the fake join message to appear after 60 seconds
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        scheduler.schedule(() -> {
+            MinecraftServer server = event.getServer();
+            if (!hasSentMessage) {
+                server.getPlayerList().broadcastMessage(new TextComponent("§eDhandu joined the game"), false);
+                hasSentMessage = true;
+            }
+        }, 60, TimeUnit.SECONDS);
     }
 
     @SubscribeEvent
