@@ -2,10 +2,6 @@ package com.blud.phenomenon;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.ChatFormatting;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -20,7 +16,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -28,6 +23,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -37,12 +33,7 @@ import org.slf4j.Logger;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.players.PlayerList;
 import net.minecraft.client.Minecraft;
 
 @Mod(MainMod.MODID)
@@ -50,7 +41,6 @@ public class MainMod {
     public static final String MODID = "bludmod";
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Set<String> playersJoinedBefore = new HashSet<>();
-    private static boolean messageSent = false;
 
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
@@ -87,22 +77,12 @@ public class MainMod {
 
     @SubscribeEvent
     public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
-        ServerPlayer player = (ServerPlayer) event.getEntity();
+        Player player = event.getEntity();
         String playerName = player.getName().getString();
 
         if (!playersJoinedBefore.contains(playerName)) {
             player.level.playSound(null, player.getOnPos(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
             playersJoinedBefore.add(playerName);
-        }
-
-        if (!messageSent) {
-            ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-            scheduler.schedule(() -> {
-                MutableComponent message = new TextComponent("Dhandu joined the game").withStyle(ChatFormatting.YELLOW);
-                PlayerList playerList = player.getServer().getPlayerList();
-                playerList.broadcastMessage(message, false);
-                messageSent = true;
-            }, 40, TimeUnit.SECONDS);
         }
     }
 
@@ -111,13 +91,16 @@ public class MainMod {
         Player player = event.player;
         Level level = player.level;
 
+        // Get player's current block position
         BlockPos playerPos = player.getOnPos();
 
+        // Check light level at player's position
         int lightLevel = level.getMaxLocalRawBrightness(playerPos);
 
+        // Check if the player is in a dark place (e.g., cave, night)
         if (lightLevel < 5) {
             Random random = new Random();
-            if (random.nextFloat() < 0.01) {
+            if (random.nextFloat() < 0.01) { // 1% chance to play the sound on each tick
                 level.playSound(null, playerPos, ModSounds.BLOCKBREAK_SOUND.get(), SoundSource.AMBIENT, 1.0F, 1.0F);
             }
         }
