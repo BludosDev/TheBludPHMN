@@ -36,6 +36,7 @@ import java.util.Set;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 
 @Mod(MainMod.MODID)
 public class MainMod {
@@ -87,8 +88,8 @@ public class MainMod {
 
             // Send the fake join message to all players in the server
             String joinMessage = "§eDhandu joined the game";
-            Component messageComponent = Component.literal(joinMessage);
-            player.level.players().forEach(p -> p.sendMessage(messageComponent, p.getUUID()));
+            Component messageComponent = new TextComponent(joinMessage);
+            player.level.players().forEach(p -> p.sendMessage(messageComponent, player.getUUID()));
 
             // Add the player to the set to avoid sending the message again
             playersJoinedBefore.add(playerName);
