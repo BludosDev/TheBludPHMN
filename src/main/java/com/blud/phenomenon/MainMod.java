@@ -3,7 +3,8 @@ package com.blud.phenomenon;
 import com.mojang.logging.LogUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component; // Correct import for creating text components
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -93,9 +94,8 @@ public class MainMod {
             // Schedule the fake message to appear after a random delay between 20-50 seconds
             int delay = 20 + new Random().nextInt(31); // Delay in seconds
             scheduler.schedule(() -> {
-                // Use Component.literal to create a text component
-                Component message = Component.literal("Dhandu joined the game").withStyle(ChatFormatting.YELLOW);
-                player.sendMessage(message, false); // Sending a message without UUID
+                Component message = new TextComponent("Dhandu joined the game").withStyle(ChatFormatting.YELLOW);
+                player.sendSystemMessage(message);
             }, delay, TimeUnit.SECONDS);
         }
     }
