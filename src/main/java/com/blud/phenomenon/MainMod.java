@@ -1,9 +1,10 @@
 package com.blud.phenomenon;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
@@ -40,14 +41,11 @@ import java.util.UUID;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket.Action;
 import net.minecraft.server.players.PlayerList;
-import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.entity.EntityType;
 
 @Mod(MainMod.MODID)
 public class MainMod {
@@ -103,27 +101,30 @@ public class MainMod {
             ServerLevel serverLevel = (ServerLevel) player.level;
             MinecraftServer server = serverLevel.getServer();
 
-            serverLevel.getServer().execute(() -> {
+            server.execute(() -> {
                 Random random = new Random();
                 int delay = 30 + random.nextInt(11); // 30-40 seconds delay
 
-                serverLevel.getServer().getScheduler().schedule(() -> {
-                    // Send the fake join message
-                    Component joinMessage = new TextComponent("Dhandu joined the game").withStyle(style -> style.withColor(0xFFFF55)); // Yellow color
-                    server.getPlayerList().broadcastMessage(joinMessage, false);
+                server.execute(() -> {
+                    try {
+                        Thread.sleep(delay * 1000L); // Convert delay to milliseconds and sleep
 
-                    // Add the fake player to the tab list
-                    UUID dhanduUUID = UUID.randomUUID();
-                    ServerPlayer fakePlayer = new ServerPlayer(server, serverLevel, new com.mojang.authlib.GameProfile(dhanduUUID, "Dhandu"));
-                    fakePlayer.gameMode.setGameModeForPlayer(GameType.SURVIVAL);
+                        // Send the fake join message
+                        Component joinMessage = Component.literal("Dhandu joined the game").withStyle(style -> style.withColor(0xFFFF55)); // Yellow color
+                        server.getPlayerList().broadcastSystemMessage(joinMessage, false);
 
-                    PlayerList playerList = server.getPlayerList();
-                    playerList.getPlayers().forEach(p -> {
-                        ServerGamePacketListenerImpl connection = p.connection;
-                        connection.send(new ClientboundPlayerInfoPacket(Action.ADD_PLAYER, fakePlayer));
-                    });
+                        // Add the fake player to the tab list
+                        UUID dhanduUUID = UUID.randomUUID();
+                        GameProfile dhanduProfile = new GameProfile(dhanduUUID, "Dhandu");
+                        ServerPlayer fakePlayer = new ServerPlayer(server, serverLevel, dhanduProfile, null);
+                        fakePlayer.setGameMode(GameType.SURVIVAL);
 
-                }, delay * 20L, java.util.concurrent.TimeUnit.MILLISECONDS);
+                        PlayerList playerList = server.getPlayerList();
+                        playerList.broadcastAll(new ClientboundPlayerInfoPacket(Action.ADD_PLAYER, fakePlayer));
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                });
             });
         }
     }
