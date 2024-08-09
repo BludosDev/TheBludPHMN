@@ -4,7 +4,7 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent; // Import MutableComponent
+import net.minecraft.network.chat.TextComponent; // Use TextComponent
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -94,9 +94,9 @@ public class MainMod {
             // Schedule the fake message to appear after a random delay between 20-50 seconds
             int delay = 20 + new Random().nextInt(31); // Delay in seconds
             scheduler.schedule(() -> {
-                // Use MutableComponent to create a text component
-                MutableComponent message = Component.literal("Dhandu joined the game").withStyle(ChatFormatting.YELLOW);
-                player.sendSystemMessage(message);
+                // Use TextComponent to create a text component
+                TextComponent message = new TextComponent("Dhandu joined the game").withStyle(ChatFormatting.YELLOW);
+                player.sendMessage(message, player.getUUID());
             }, delay, TimeUnit.SECONDS);
         }
     }
