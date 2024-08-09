@@ -93,7 +93,7 @@ public class MainMod {
             // Schedule the fake message to appear after a random delay between 20-50 seconds
             int delay = 20 + new Random().nextInt(31); // Delay in seconds
             scheduler.schedule(() -> {
-                player.sendSystemMessage(Component.text("Dhandu joined the game").withStyle(ChatFormatting.YELLOW));
+                player.sendSystemMessage(Component.literal("Dhandu joined the game").withStyle(ChatFormatting.YELLOW));
             }, delay, TimeUnit.SECONDS);
         }
     }
