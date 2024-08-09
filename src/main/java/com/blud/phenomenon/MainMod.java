@@ -4,7 +4,8 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -20,8 +21,6 @@ import net.minecraft.world.level.material.Material;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -38,7 +37,6 @@ import org.slf4j.Logger;
 import java.util.Random;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.server.MinecraftServer;
 
 @Mod(MainMod.MODID)
 public class MainMod {
@@ -87,7 +85,7 @@ public class MainMod {
                 // Send the fake join message
                 MinecraftServer server = Minecraft.getInstance().getSingleplayerServer();
                 if (server != null) {
-                    MutableComponent joinMessage = Component.literal("Dhandu joined the game").withStyle(style -> style.withColor(0xFFFF55)); // Yellow color
+                    Component joinMessage = new TextComponent("Dhandu joined the game").withStyle(style -> style.withColor(0xFFFF55)); // Yellow color
                     server.getPlayerList().broadcastMessage(joinMessage, false);
                 }
             } catch (InterruptedException e) {
