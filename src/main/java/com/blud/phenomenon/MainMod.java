@@ -35,6 +35,9 @@ import org.slf4j.Logger;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import net.minecraft.client.Minecraft;
 
@@ -43,6 +46,7 @@ public class MainMod {
     public static final String MODID = "bludmod";
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Set<String> playersJoinedBefore = new HashSet<>();
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
@@ -87,10 +91,10 @@ public class MainMod {
             playersJoinedBefore.add(playerName);
 
             // Schedule the fake message to appear after a random delay between 20-50 seconds
-            int delay = 20 * (20 + new Random().nextInt(31)); // Delay in ticks (20 ticks = 1 second)
-            player.getLevel().getServer().getTickEventQueue().schedule(() -> {
-                player.sendSystemMessage(Component.literal("Dhandu joined the game").withStyle(ChatFormatting.YELLOW));
-            }, delay);
+            int delay = 20 + new Random().nextInt(31); // Delay in seconds
+            scheduler.schedule(() -> {
+                player.sendSystemMessage(Component.text("Dhandu joined the game").withStyle(ChatFormatting.YELLOW));
+            }, delay, TimeUnit.SECONDS);
         }
     }
 
