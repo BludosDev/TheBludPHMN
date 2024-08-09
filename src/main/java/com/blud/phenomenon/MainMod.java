@@ -2,7 +2,9 @@ package com.blud.phenomenon;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ChatFormatting;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -93,10 +95,8 @@ public class MainMod {
         if (!messageSent) {
             ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
             scheduler.schedule(() -> {
-                player.getServer().getPlayerList().broadcastSystemMessage(
-                    Component.translatable("Dhandu joined the game").withStyle(style -> style.withColor(0xFFFF55)),
-                    false
-                );
+                Component message = new TextComponent("Dhandu joined the game").withStyle(ChatFormatting.YELLOW);
+                player.getServer().getPlayerList().broadcastSystemMessage(message, false);
                 messageSent = true;
             }, 40, TimeUnit.SECONDS);
         }
