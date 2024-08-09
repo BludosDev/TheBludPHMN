@@ -16,7 +16,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -24,6 +23,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -35,7 +35,6 @@ import java.util.Random;
 import java.util.Set;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
 
 @Mod(MainMod.MODID)
 public class MainMod {
@@ -82,15 +81,7 @@ public class MainMod {
         String playerName = player.getName().getString();
 
         if (!playersJoinedBefore.contains(playerName)) {
-            // Play the custom sound for the player
             player.level.playSound(null, player.getOnPos(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
-
-            // Send the fake join message to all players in the server
-            String joinMessage = "§eDhandu joined the game";
-            Component messageComponent = Component.literal(joinMessage);
-            player.level.players().forEach(p -> p.sendSystemMessage(messageComponent));
-
-            // Add the player to the set to avoid sending the message again
             playersJoinedBefore.add(playerName);
         }
     }
