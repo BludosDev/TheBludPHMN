@@ -7,12 +7,14 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -29,16 +31,17 @@ import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
 
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
-import net.minecraft.client.Minecraft;  // Ensure this import is present
+
+import net.minecraft.client.Minecraft;
 
 @Mod(MainMod.MODID)
 public class MainMod {
     public static final String MODID = "bludmod";
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final Set<String> playersJoinedBefore = new HashSet<>();  // Track players who have joined before
+    private static final Set<String> playersJoinedBefore = new HashSet<>();
 
-    // Registering blocks and items
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
 
@@ -50,7 +53,7 @@ public class MainMod {
         modEventBus.addListener(this::commonSetup);
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
-        ModSounds.register(modEventBus);  // Register the sound events
+        ModSounds.register(modEventBus);
 
         MinecraftForge.EVENT_BUS.register(this);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);
@@ -78,9 +81,26 @@ public class MainMod {
         String playerName = player.getName().getString();
 
         if (!playersJoinedBefore.contains(playerName)) {
-            // First time join logic
             player.level.playSound(null, player.getOnPos(), ModSounds.PHEN_228_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
             playersJoinedBefore.add(playerName);
+        }
+    }
+
+    @SubscribeEvent
+    public void onPlayerTick(TickEvent.PlayerTickEvent event) {
+        Player player = event.player;
+        Level level = player.level;
+
+        
+        BlockPos playerPos = player.blockPosition();
+        int lightLevel = level.getMaxLocalRawBrightness(playerPos);
+
+        
+        if (lightLevel < 5) {
+            Random random = new Random();
+            if (random.nextFloat() < 0.01) {
+                level.playSound(null, playerPos, ModSounds.BLOCKBREAK_SOUND.get(), SoundSource.AMBIENT, 1.0F, 1.0F);
+            }
         }
     }
 
